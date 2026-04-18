@@ -10,6 +10,60 @@ from parser  import Parser,  ParseError
 from codegen import CodeGenerator, CodeGenError
 
 
+# ── First & Follow Sets ───────────────────────────────────────────────────────
+
+def print_first_follow():
+    """
+    Hardcoded First and Follow sets for the MiniLang grammar.
+
+    Grammar rules:
+      program   → BEGIN stmts END
+      stmts     → stmt stmts | ε
+      stmt      → decl | assign | print | for_stmt
+      decl      → ('INTEGER'|'REAL'|'STRING') IDENT (',' IDENT)*
+      assign    → IDENT ':=' expr
+      print     → PRINT STRING
+      for_stmt  → FOR IDENT ':=' expr TO expr stmts END
+      expr      → INTEGER | REAL | STRING | IDENT
+    """
+
+    first = {
+        'program'  : ['BEGIN'],
+        'stmts'    : ['INTEGER', 'REAL', 'STRING', 'IDENT', 'PRINT', 'FOR', 'ε'],
+        'stmt'     : ['INTEGER', 'REAL', 'STRING', 'IDENT', 'PRINT', 'FOR'],
+        'decl'     : ['INTEGER', 'REAL', 'STRING'],
+        'assign'   : ['IDENT'],
+        'print'    : ['PRINT'],
+        'for_stmt' : ['FOR'],
+        'expr'     : ['INTEGER', 'REAL', 'STRING', 'IDENT'],
+    }
+
+    follow = {
+        'program'  : ['$'],
+        'stmts'    : ['END', '$'],
+        'stmt'     : ['INTEGER', 'REAL', 'STRING', 'IDENT', 'PRINT', 'FOR', 'END', '$'],
+        'decl'     : ['INTEGER', 'REAL', 'STRING', 'IDENT', 'PRINT', 'FOR', 'END', '$'],
+        'assign'   : ['INTEGER', 'REAL', 'STRING', 'IDENT', 'PRINT', 'FOR', 'END', '$'],
+        'print'    : ['INTEGER', 'REAL', 'STRING', 'IDENT', 'PRINT', 'FOR', 'END', '$'],
+        'for_stmt' : ['INTEGER', 'REAL', 'STRING', 'IDENT', 'PRINT', 'FOR', 'END', '$'],
+        'expr'     : ['TO', 'NEWLINE', 'END', '$'],
+    }
+
+    print("\n" + "=" * 60)
+    print(" 4. FIRST AND FOLLOW SETS")
+    print("=" * 60)
+
+    rules = ['program', 'stmts', 'stmt', 'decl', 'assign', 'print', 'for_stmt', 'expr']
+    rows  = []
+    for r in rules:
+        rows.append([
+            r,
+            '{ ' + ', '.join(first[r])  + ' }',
+            '{ ' + ', '.join(follow[r]) + ' }'
+        ])
+    print_table(["Non-Terminal", "FIRST", "FOLLOW"], rows)
+
+
 # ── Table printing helpers ────────────────────────────────────────────────────
 
 def print_table(headers, rows):
@@ -134,9 +188,12 @@ def main():
         sym_rows.append([name, info['type'], info['value'], info['scope']])
     print_table(["Name", "Type", "Value", "Scope"], sym_rows)
 
-    # ── Phase 4: Program Output ───────────────────────────────────────────
+    # ── Phase 4: First & Follow Sets ─────────────────────────────────────
+    print_first_follow()
+
+    # ── Phase 5: Program Output ───────────────────────────────────────────
     print("\n" + "=" * 60)
-    print(" 4. FINAL OUTPUT")
+    print(" 5. FINAL OUTPUT")
     print("=" * 60)
     exec(compile(code, '<generated>', 'exec'), {})
 
